@@ -1,0 +1,53 @@
+version: '3.1'
+
+services:
+    wordpress:
+        depends_on:
+            - mariadb
+        image: wordpress
+        restart: always
+        env_file:
+            - .env
+        environment:
+            WORDPRESS_DB_HOST: mariadb:3306
+            WORDPRESS_DB_USER: "${DB_USER}"
+            WORDPRESS_DB_PASSWORD: "${DB_PASSWORD}"
+            WORDPRESS_DB_NAME: "${DB_NAME}"
+        ports:
+            - 8080:80
+        networks:
+            - blog
+        volumes:
+            - wordpress:/var/www/html
+
+
+    mariadb:
+        image: mariadb
+        restart: always
+        env_file:
+            - .env
+        environment:
+            MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+            MYSQL_DATABASE: "${DB_NAME}"
+            MYSQL_USER: "${DB_USER}"
+            MYSQL_PASSWORD: "${DB_PASSWORD}"
+        networks:
+            - blog
+        volumes:
+            - blog-data:/var/lib/mysql
+
+    phpmyadmin:
+        image: phpmyadmin
+        restart: always
+        ports:
+            - 8081:80
+        environment:
+            - PMA_ARBITRARY=1
+        networks:
+            - blog
+
+networks:
+    blog:
+volumes:
+    wordpress:
+    blog-data:
